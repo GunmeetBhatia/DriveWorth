@@ -8,17 +8,20 @@ def get_matching_cars(user_input, predicted_price_range, dataset, predicted_pric
     seating = int(user_input['Seating Capacity'])
     car_age = int(user_input['Car Age'])
 
+    # Step 1: Widen the predicted price range by ±15%
     buffer = 0.15
     predicted_center = predicted_price
     min_price = predicted_center * (1 - buffer)
     max_price = predicted_center * (1 + buffer)
 
+    # Step 2: Handle fuel type (safe check if dummy column exists)
     fuel_col = f'Fuel_{fuel_type}'
     if fuel_col in dataset.columns:
         fuel_match = dataset[fuel_col] == 1
     else:
-        fuel_match = pd.Series([True] * len(dataset))
+        fuel_match = pd.Series([True] * len(dataset))  # assume fuel match if column missing
 
+    # Step 3: Matching logic
     def filter_dataset(df, seating_tolerance, age_tolerance, allow_owner=False, allow_transmission=False, allow_location=False):
         condition = (
             fuel_match &
@@ -35,10 +38,23 @@ def get_matching_cars(user_input, predicted_price_range, dataset, predicted_pric
 
         results = df[condition].copy()
         if not results.empty:
-            results['Price Diff'] = abs(results['Price'] - predicted_center)
-            results = results.sort_values(by='Price Diff')
+            results['Price Advantage'] = predicted_center - results['Price']  
+            results['Age Score'] = abs(results['Car Age'] - car_age)
+            results['Km Score'] = results['Kilometer'] / 1000
+            results['Power Score'] = -results['Max Power'] 
+
+            results['Final Score'] = (
+                -0.4 * results['Price Advantage'] + 
+                0.3 * results['Age Score'] + 
+                0.2 * results['Km Score'] + 
+                0.2 * results['Power Score']
+            )
+
+            results = results.sort_values(by='Final Score')
+
         return results
 
+    # Step 4: Matching levels
     strict_matches = filter_dataset(dataset, seating_tolerance=0, age_tolerance=1)
     if not strict_matches.empty:
         return strict_matches.head(10), "Exact matches found"
