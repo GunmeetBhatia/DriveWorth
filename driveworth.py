@@ -9,7 +9,7 @@ from filter import get_matching_cars
 model = joblib.load("car_price_model.pkl")
 dataset = pd.read_csv("cleaned_cars.csv")
 
-st.set_page_config(page_title="🚗 Driveworth", layout="centered")
+st.set_page_config(page_title=" Driveworth", layout="centered")
 
 # --- Custom CSS ---
 st.markdown("""<style>
@@ -78,7 +78,7 @@ st.markdown("""<style>
 </style>""", unsafe_allow_html=True)
 
 # --- Title ---
-st.markdown("<h1 style='text-align: center;'>Car Resale Price Estimator & Recommendation</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>DriveWorth</h1>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown("#### Fill out the car details below to get estimated resale value and suggestions:")
 
